@@ -24,6 +24,6 @@ Create zip file for modified folders with one click
 
 NOTES:
 
-Confirmation - If the output file for a task is existed in the disk, this property determines whether the program should prompt you whether to overwrite the file before the task begins
+Confirmation - If the output file for a task is existed in the disk, this property determines whether the program should prompt you whether to overwrite the file before the task begins, by default, it overwrites existing files
 
 Level - possible values are NoCompression, Fastest, Optimal
