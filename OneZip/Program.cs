@@ -6,6 +6,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 
@@ -24,7 +25,8 @@ namespace OneZip
                     var dict = ModifiedTimeDict.Get() ?? new ModifiedTimeDict();
                     if (Directory.Exists(task.SrcFolder))
                     {
-                        DateTime lastModifiedTime = Directory.GetLastWriteTime(task.SrcFolder);
+                        DateTime lastModifiedTime = GetLastModifiedTime(task.SrcFolder);
+                        // System.Console.WriteLine(lastModifiedTime);
                         bool createZipFile = !File.Exists(task.ZipFilePath);
 
                         if (dict.ContainsKey(task.Identity))
@@ -33,6 +35,7 @@ namespace OneZip
                             {
                                 createZipFile = true;
                             }
+                            // System.Console.WriteLine(dict[task.Identity]);
                         }
                         else
                         {
@@ -49,7 +52,7 @@ namespace OneZip
                                 if (task.Confirmation)
                                 {
                                     System.Console.Write(string.Format("File {0} is existing, overwrite?(Y/n)", task.ZipFilePath));
-L0:
+                                L0:
                                     string answer = System.Console.ReadLine();
                                     if (answer == "Y")
                                     {
@@ -97,6 +100,53 @@ L0:
 
             System.Console.WriteLine("All done");
             System.Console.ReadLine();
+        }
+
+        /// <summary>
+        /// Get the last modified time for file or folder
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="Exception"></exception>
+        private static DateTime GetLastModifiedTime(string path)
+        {
+            FileAttributes attr = File.GetAttributes(path);
+            if (!attr.HasFlag(FileAttributes.Directory))
+            {
+                return File.GetLastWriteTime(path);
+            }
+
+            DirectoryInfo root = new DirectoryInfo(path);
+            DateTime lastModifiedTime = root.LastWriteTime;
+            Stack<DirectoryInfo> st = new Stack<DirectoryInfo>();
+            st.Push(new DirectoryInfo(path));
+
+            while (st.Count > 0)
+            {
+                DirectoryInfo subDir = st.Pop();
+                if (subDir.LastWriteTime > lastModifiedTime)
+                {
+                    lastModifiedTime = subDir.LastWriteTime;
+                }
+                foreach (var file in subDir.GetFiles())
+                {
+                    if (file.LastWriteTime > lastModifiedTime)
+                    {
+                        lastModifiedTime = file.LastWriteTime;
+                    }
+                }
+                foreach (var dir in subDir.GetDirectories())
+                {
+                    st.Push(dir);
+                }
+            }
+
+            return lastModifiedTime;
         }
 
         private static void TestMain()
