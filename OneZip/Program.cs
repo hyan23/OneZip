@@ -22,20 +22,18 @@ namespace OneZip
                 {
                     System.Console.WriteLine("Start task " + task.Name);
 
-                    var dict = ModifiedTimeDict.Get() ?? new ModifiedTimeDict();
                     if (Directory.Exists(task.SrcFolder))
                     {
                         DateTime lastModifiedTime = GetLastModifiedTime(task.SrcFolder);
                         // System.Console.WriteLine(lastModifiedTime);
-                        bool createZipFile = !File.Exists(task.ZipFilePath);
-
-                        if (dict.ContainsKey(task.Identity))
+                        
+                        bool createZipFile = false;
+                        if (File.Exists(task.ZipFilePath))
                         {
-                            if (dict[task.Identity] < lastModifiedTime)
+                            if (File.GetLastWriteTime(task.ZipFilePath) < lastModifiedTime)
                             {
                                 createZipFile = true;
                             }
-                            // System.Console.WriteLine(dict[task.Identity]);
                         }
                         else
                         {
@@ -77,8 +75,6 @@ namespace OneZip
                                     File.Delete(task.ZipFilePath);
                                 }
                                 ZipFile.CreateFromDirectory(task.SrcFolder, task.ZipFilePath, task.Level, false);
-                                dict[task.Identity] = lastModifiedTime;
-                                ModifiedTimeDict.Serialize(dict);
                             }
                         }
                         else

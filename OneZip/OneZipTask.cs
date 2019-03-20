@@ -13,7 +13,6 @@ namespace OneZip
                 Name = "任务"
             };
             System.Console.WriteLine(task);
-            System.Console.WriteLine(task.Identity);
         }
 
         public OneZipTask()
@@ -54,10 +53,5 @@ namespace OneZip
         /// Compression level, possible values are NoCompression, Fastest, Optimal
         /// </summary>
         public CompressionLevel Level { get; set; }
-
-        /// <summary>
-        /// A string that uniquely identify this task
-        /// </summary>
-        public string Identity => Convert.ToBase64String(Encoding.ASCII.GetBytes(ToString().ToCharArray()));
     }
 }
